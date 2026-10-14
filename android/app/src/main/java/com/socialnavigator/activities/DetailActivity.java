@@ -4,10 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.socialnavigator.R;
+import com.socialnavigator.models.Discount;
+import com.socialnavigator.storage.DiscountRepository;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -16,13 +19,19 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        // Кнопка "Назад" в ActionBar
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        // Получаем id скидки из Intent
         int discountId = getIntent().getIntExtra("discount_id", -1);
+
+        Discount discount = DiscountRepository.getInstance().getById(discountId);
+
+        if (discount == null) {
+            Toast.makeText(this, "Скидка не найдена", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
         TextView tvTitle = findViewById(R.id.tvDetailTitle);
         TextView tvCategory = findViewById(R.id.tvDetailCategory);
@@ -31,21 +40,20 @@ public class DetailActivity extends AppCompatActivity {
         Button btnToggleFavorite = findViewById(R.id.btnToggleFavorite);
         Button btnShare = findViewById(R.id.btnShare);
 
-        // Пока заглушка — заменим на реальные данные в Этапе 5
-        tvTitle.setText("Акция #" + discountId);
-        tvCategory.setText("Категория: student • Москва");
-        tvDescription.setText("Здесь будет подробное описание акции. Пока это заглушка.");
-        tvExpires.setText("Действует до: 31.12.2025");
+        tvTitle.setText(discount.getName());
+        tvCategory.setText(discount.getType() + " • " + discount.getAddress());
+        tvDescription.setText(discount.getPromotional());
+        tvExpires.setText("🕐 " + discount.getTimeOfApplication());
 
         btnToggleFavorite.setOnClickListener(v ->
-                // TODO: реализуем в Этапе 4
-                btnToggleFavorite.setText("В избранном"));
+                Toast.makeText(this, "Избранное — в Этапе 4", Toast.LENGTH_SHORT).show());
 
         btnShare.setOnClickListener(v -> {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
             shareIntent.putExtra(Intent.EXTRA_TEXT,
-                    "Посмотри эту акцию в Social Navigator: #" + discountId);
+                    discount.getName() + "\n" + discount.getPromotional() +
+                            "\n" + discount.getAddress());
             startActivity(Intent.createChooser(shareIntent, "Поделиться"));
         });
     }
