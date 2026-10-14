@@ -1,0 +1,29 @@
+# Виртуальное окружение Python
+venv/
+env/
+.venv/
+
+# Кэш Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Базы данных SQLite (ВАЖНО! Чтобы не залить локальную БД)
+*.db
+*.sqlite
+*.sqlite3
+
+# Файлы переменных окружения и секретов
+.env
+.env.local
+
+# Настройки редакторов
+.vscode/
+.idea/
+
+# Файлы операционных систем
+.DS_Store
+Thumbs.db
+
+# Логи
+*.log
