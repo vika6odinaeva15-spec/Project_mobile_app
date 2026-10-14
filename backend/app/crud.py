@@ -2,7 +2,7 @@ import sqlite3
 from app.database import DB_PATH
 
 
-def get_promotions(City: str = None, Type: str = None):
+def get_promotions(City: str = None, Type: str = None, Category: str = None):
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
@@ -16,6 +16,9 @@ def get_promotions(City: str = None, Type: str = None):
     if Type:
         query += ' AND Type=?'
         params.append(Type)
+    if Category:
+        query += ' AND Category=?'
+        params.append(Category)
 
     cursor.execute(query, params)
     rows = [dict(row) for row in cursor.fetchall()]
@@ -74,3 +77,11 @@ def delete_promotion(id: int):
     conn.commit()
     conn.close()
     return {"status": "deleted"}
+
+def get_categories():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT category FROM promotions ORDER BY category")
+    rows = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return rows
