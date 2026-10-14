@@ -1,74 +1,212 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:orientation="vertical"
+    android:background="#FAFAFA">
 
-    <LinearLayout
+    <!-- Toolbar со стрелкой "Назад" -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarDetail"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="?attr/actionBarSize"
+        android:background="#2E7D32"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:navigationIcon="@android:drawable/ic_menu_revert"
+        app:title="Акция"
+        app:titleTextColor="#FFFFFF"/>
 
-        <ImageView
-            android:id="@+id/ivDetailImage"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:scaleType="centerCrop"
-            android:background="#E0E0E0"
-            android:src="@android:drawable/ic_menu_gallery"
-            android:layout_marginBottom="16dp"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <TextView
-            android:id="@+id/tvDetailTitle"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Название акции"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"/>
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvDetailCategory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Категория • Город"
-            android:textSize="14sp"
-            android:textColor="#666666"
-            android:layout_marginBottom="16dp"/>
+            <!-- Изображение-заглушка -->
+            <ImageView
+                android:id="@+id/ivDetailImage"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop"
+                android:background="#E0E0E0"
+                android:src="@android:drawable/ic_menu_gallery"/>
 
-        <TextView
-            android:id="@+id/tvDetailDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Подробное описание акции появится здесь."
-            android:textSize="16sp"
-            android:lineSpacingExtra="4dp"
-            android:layout_marginBottom="24dp"/>
+            <!-- Основной контент -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
 
-        <TextView
-            android:id="@+id/tvDetailExpires"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Действует до: —"
-            android:textSize="14sp"
-            android:textColor="#888888"
-            android:layout_marginBottom="24dp"/>
+                <!-- Название -->
+                <TextView
+                    android:id="@+id/tvDetailTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Название акции"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="#212121"
+                    android:layout_marginBottom="4dp"/>
 
-        <Button
-            android:id="@+id/btnToggleFavorite"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Добавить в избранное"
-            android:padding="14dp"
-            android:layout_marginBottom="12dp"/>
+                <!-- Тип -->
+                <TextView
+                    android:id="@+id/tvDetailCategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Тип"
+                    android:textSize="14sp"
+                    android:textColor="#0D47A1"
+                    android:background="#E3F2FD"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:layout_marginBottom="20dp"/>
 
-        <Button
-            android:id="@+id/btnShare"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Поделиться"
-            android:padding="14dp"/>
+                <!-- Разделитель -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#E0E0E0"
+                    android:layout_marginBottom="20dp"/>
 
-    </LinearLayout>
-</ScrollView>
+                <!-- Описание -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="📝 Описание акции"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#888888"
+                    android:layout_marginBottom="6dp"/>
+
+                <TextView
+                    android:id="@+id/tvDetailDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Описание"
+                    android:textSize="16sp"
+                    android:textColor="#212121"
+                    android:lineSpacingExtra="4dp"
+                    android:layout_marginBottom="20dp"/>
+
+                <!-- Адрес -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="📍 Адрес"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#888888"
+                    android:layout_marginBottom="6dp"/>
+
+                <TextView
+                    android:id="@+id/tvDetailAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Адрес"
+                    android:textSize="15sp"
+                    android:textColor="#212121"
+                    android:layout_marginBottom="12dp"/>
+
+                <!-- Yandex MapView -->
+                <com.yandex.mapkit.mapview.MapView
+                    android:id="@+id/mapview"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_marginBottom="20dp"/>
+
+                <!-- Время работы -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🕐 Время работы"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#888888"
+                    android:layout_marginBottom="6dp"/>
+
+                <TextView
+                    android:id="@+id/tvDetailExpires"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Время работы"
+                    android:textSize="15sp"
+                    android:textColor="#212121"
+                    android:layout_marginBottom="20dp"/>
+
+                <!-- Разделитель -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#E0E0E0"
+                    android:layout_marginBottom="20dp"/>
+
+                <!-- Сайт -->
+                <LinearLayout
+                    android:id="@+id/layoutWebsite"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="🔗 Сайт"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:textColor="#888888"
+                        android:layout_marginBottom="6dp"/>
+
+                    <TextView
+                        android:id="@+id/tvDetailWebsite"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Ссылка"
+                        android:textSize="15sp"
+                        android:textColor="#1976D2"
+                        android:autoLink="web"
+                        android:layout_marginBottom="16dp"/>
+
+                </LinearLayout>
+
+                <!-- Кнопка: избранное -->
+                <Button
+                    android:id="@+id/btnToggleFavorite"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Добавить в избранное"
+                    android:textSize="15sp"
+                    android:padding="14dp"
+                    android:layout_marginBottom="10dp"/>
+
+                <!-- Кнопка: открыть сайт -->
+                <Button
+                    android:id="@+id/btnOpenWebsite"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Открыть сайт"
+                    android:textSize="15sp"
+                    android:padding="14dp"
+                    android:layout_marginBottom="10dp"/>
+
+                <!-- Кнопка: поделиться -->
+                <Button
+                    android:id="@+id/btnShare"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Поделиться"
+                    android:textSize="15sp"
+                    android:padding="14dp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

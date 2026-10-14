@@ -1,6 +1,17 @@
+import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
 }
+val mapkitApiKey: String = run {
+    val properties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { properties.load(it) }
+    }
+    properties.getProperty("MAPKIT_API_KEY", "")
+
+}
+
 
 android {
     namespace = "com.socialnavigator"
@@ -10,12 +21,19 @@ android {
 
     defaultConfig {
         applicationId = "com.socialnavigator"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "MAPKIT_API_KEY", "\"$mapkitApiKey\"")
+        manifestPlaceholders["MAPKIT_API_KEY"] = mapkitApiKey
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -39,6 +57,7 @@ dependencies {
     implementation(libs.material)
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("com.yandex.android:maps.mobile:4.33.0-lite")
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)

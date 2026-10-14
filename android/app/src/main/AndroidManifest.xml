@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -12,6 +13,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SocialNavigator">
 
+        <meta-data
+            android:name="com.yandex.maps.apikey"
+            android:value="${MAPKIT_API_KEY}" />
+        
         <activity
             android:name=".activities.RoleAndCityActivity"
             android:exported="true"
@@ -31,5 +36,7 @@
             android:exported="false" />
 
     </application>
+
+
 
 </manifest>

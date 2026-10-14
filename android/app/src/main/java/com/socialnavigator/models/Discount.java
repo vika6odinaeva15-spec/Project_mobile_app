@@ -11,6 +11,8 @@ public class Discount {
     private String timeOfApplication;
     private String address;
     private String linkToWebsite;
+    private double latitude;
+    private double longitude;
 
     // Пустой конструктор — для Gson (Этап 5)
     public Discount() {
@@ -19,7 +21,8 @@ public class Discount {
     // Полный конструктор — для тестовых данных (Этап 2)
     public Discount(int id, String city, String category, String name,
                     String type, String promotional, String timeOfApplication,
-                    String address, String linkToWebsite) {
+                    String address, String linkToWebsite,
+                    double latitude, double longitude) {
         this.id = id;
         this.city = city;
         this.category = category;
@@ -29,6 +32,8 @@ public class Discount {
         this.timeOfApplication = timeOfApplication;
         this.address = address;
         this.linkToWebsite = linkToWebsite;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     // --- Геттеры и сеттеры ---
@@ -103,5 +108,20 @@ public class Discount {
 
     public void setLinkToWebsite(String linkToWebsite) {
         this.linkToWebsite = linkToWebsite;
+    }
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }
