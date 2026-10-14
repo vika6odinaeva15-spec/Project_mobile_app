@@ -11,8 +11,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.socialnavigator.R;
 import com.socialnavigator.models.Discount;
 import com.socialnavigator.storage.DiscountRepository;
+import com.socialnavigator.storage.FavoritesManager;
 
 public class DetailActivity extends AppCompatActivity {
+
+    private Discount discount;
+    private FavoritesManager favoritesManager;
+    private Button btnToggleFavorite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,9 +28,14 @@ public class DetailActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
+        // Получаем менеджер избранного
+        favoritesManager = FavoritesManager.getInstance(this);
+
+        // Получаем ID скидки из Intent
         int discountId = getIntent().getIntExtra("discount_id", -1);
 
-        Discount discount = DiscountRepository.getInstance().getById(discountId);
+        // Ищем скидку в репозитории
+        discount = DiscountRepository.getInstance().getById(discountId);
 
         if (discount == null) {
             Toast.makeText(this, "Скидка не найдена", Toast.LENGTH_SHORT).show();
@@ -33,21 +43,37 @@ public class DetailActivity extends AppCompatActivity {
             return;
         }
 
+        // Находим View
         TextView tvTitle = findViewById(R.id.tvDetailTitle);
         TextView tvCategory = findViewById(R.id.tvDetailCategory);
         TextView tvDescription = findViewById(R.id.tvDetailDescription);
         TextView tvExpires = findViewById(R.id.tvDetailExpires);
-        Button btnToggleFavorite = findViewById(R.id.btnToggleFavorite);
+        btnToggleFavorite = findViewById(R.id.btnToggleFavorite);
         Button btnShare = findViewById(R.id.btnShare);
 
+        // Заполняем данными
         tvTitle.setText(discount.getName());
         tvCategory.setText(discount.getType() + " • " + discount.getAddress());
         tvDescription.setText(discount.getPromotional());
         tvExpires.setText("🕐 " + discount.getTimeOfApplication());
 
-        btnToggleFavorite.setOnClickListener(v ->
-                Toast.makeText(this, "Избранное — в Этапе 4", Toast.LENGTH_SHORT).show());
+        // Обновляем состояние кнопки избранного
+        updateFavoriteButton();
 
+        // Клик по кнопке "В избранное / Убрать"
+        btnToggleFavorite.setOnClickListener(v -> {
+            int id = discount.getId();
+            if (favoritesManager.isFavorite(id)) {
+                favoritesManager.remove(id);
+                Toast.makeText(this, "Удалено из избранного", Toast.LENGTH_SHORT).show();
+            } else {
+                favoritesManager.add(id);
+                Toast.makeText(this, "Добавлено в избранное", Toast.LENGTH_SHORT).show();
+            }
+            updateFavoriteButton();
+        });
+
+        // Кнопка "Поделиться"
         btnShare.setOnClickListener(v -> {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
@@ -56,6 +82,17 @@ public class DetailActivity extends AppCompatActivity {
                             "\n" + discount.getAddress());
             startActivity(Intent.createChooser(shareIntent, "Поделиться"));
         });
+    }
+
+    /**
+     * Обновляет текст кнопки в зависимости от статуса избранного.
+     */
+    private void updateFavoriteButton() {
+        if (favoritesManager.isFavorite(discount.getId())) {
+            btnToggleFavorite.setText("Убрать из избранного");
+        } else {
+            btnToggleFavorite.setText("Добавить в избранное");
+        }
     }
 
     @Override
