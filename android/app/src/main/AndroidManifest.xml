@@ -12,7 +12,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SocialNavigator">
 
-        <!-- Стартовый экран: выбор роли и города -->
         <activity
             android:name=".activities.RoleAndCityActivity"
             android:exported="true"
@@ -23,9 +22,12 @@
             </intent-filter>
         </activity>
 
-        <!-- Главный экран с BottomNavigation -->
         <activity
             android:name=".activities.MainActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".activities.DetailActivity"
             android:exported="false" />
 
     </application>
