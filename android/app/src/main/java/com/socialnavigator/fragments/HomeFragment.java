@@ -6,6 +6,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.widget.ImageButton;
+import androidx.appcompat.widget.Toolbar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -51,6 +56,23 @@ public class HomeFragment extends Fragment {
         tvEmpty = view.findViewById(R.id.tvEmpty);
 
         rvDiscounts.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        // Toolbar
+        Toolbar toolbar = view.findViewById(R.id.toolbarHome);
+        toolbar.setTitle("Social Navigator");
+
+// Город
+        TextView tvToolbarCity = view.findViewById(R.id.tvToolbarCity);
+        SharedPreferences prefs = requireActivity()
+                .getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        String city = prefs.getString("city", "Москва");
+        tvToolbarCity.setText(city);
+
+// Кнопка фильтра
+        ImageButton btnFilter = view.findViewById(R.id.btnFilter);
+        btnFilter.setOnClickListener(v -> {
+            Toast.makeText(requireContext(), "Фильтр — в разработке", Toast.LENGTH_SHORT).show();
+        });
 
         adapter = new DiscountAdapter(discounts, discount -> {
             Intent intent = new Intent(requireActivity(), DetailActivity.class);

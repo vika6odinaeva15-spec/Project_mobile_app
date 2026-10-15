@@ -1,5 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Базовые -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- === ОСНОВНАЯ ПАЛИТРА — СВЕТЛО-ЗЕЛЁНАЯ === -->
+    <color name="primary">#81C784</color>              <!-- Toolbar + BottomNav -->
+    <color name="primary_dark">#66BB6A</color>          <!-- тёмный вариант -->
+    <color name="primary_light">#A5D6A7</color>         <!-- светлый -->
+    <color name="primary_container">#E8F5E9</color>     <!-- фон-контейнер -->
+    <color name="on_primary">#1B5E20</color>            <!-- текст/иконки на primary -->
+    <color name="on_primary_light">#4CAF50</color>      <!-- неактивные иконки -->
+
+    <!-- Акцент (синий) -->
+    <color name="secondary">#1976D2</color>
+    <color name="secondary_dark">#0D47A1</color>
+    <color name="secondary_container">#E3F2FD</color>
+    <color name="on_secondary_container">#0D47A1</color>
+
+    <!-- === ФОН — ОЧЕНЬ СВЕТЛЫЙ, ПОЧТИ БЕЛЫЙ === -->
+    <color name="background">#F1F8F2</color>            <!-- фон экрана -->
+    <color name="surface">#FFFFFF</color>               <!-- карточки -->
+    <color name="surface_variant">#E8F5E9</color>
+
+    <!-- Тексты -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#555555</color>
+    <color name="text_tertiary">#888888</color>
+    <color name="text_hint">#AAAAAA</color>
+
+    <!-- Разделители -->
+    <color name="divider">#DCEFDE</color>
+
+    <!-- Статусы -->
+    <color name="error">#D32F2F</color>
+    <color name="success">#388E3C</color>
+
+    <!-- Карточки: плашка «тип» -->
+    <color name="tag_background">#E3F2FD</color>
+    <color name="tag_text">#0D47A1</color>
+
+    <!-- Избранное -->
+    <color name="favorite_active">#FFC107</color>
+    <color name="favorite_inactive">#BDBDBD</color>
+
+    <!-- === НИЖНЕЕ МЕНЮ (BottomNavigation) === -->
+    <color name="bottom_nav_background">#81C784</color>       <!-- СВЕТЛО-ЗЕЛЁНЫЙ как Toolbar -->
+    <color name="bottom_nav_item_active">#1B5E20</color>      <!-- активный: тёмно-зелёный -->
+    <color name="bottom_nav_item_inactive">#4CAF50</color>    <!-- неактивный: средне-зелёный -->
 </resources>
