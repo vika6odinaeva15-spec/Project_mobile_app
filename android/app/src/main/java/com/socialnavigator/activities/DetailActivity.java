@@ -1,15 +1,21 @@
 package com.socialnavigator.activities;
 
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.yandex.runtime.image.ImageProvider;
+import android.widget.ImageView;
+import com.socialnavigator.utils.TypeImageMapper;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -27,8 +33,15 @@ import com.yandex.mapkit.map.MapObject;
 import com.yandex.mapkit.map.MapObjectTapListener;
 import com.yandex.mapkit.map.PlacemarkMapObject;
 import com.yandex.mapkit.mapview.MapView;
+import com.yandex.runtime.image.ImageProvider;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 public class DetailActivity extends AppCompatActivity {
+
+    private static final String TAG = "MAP_DEBUG";
 
     private Discount discount;
     private FavoritesManager favoritesManager;
@@ -38,9 +51,17 @@ public class DetailActivity extends AppCompatActivity {
     private MapView mapView;
     private static boolean mapKitInitialized = false;
 
+    // Флаг: карта готова принимать команды (onStart вызван)
+    private boolean mapReady = false;
+    // Отложенные координаты, если updateMap вызван до onStart
+    private boolean hasPendingCoords = false;
+    private double pendingLat = 0.0;
+    private double pendingLng = 0.0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "1. START");
 
         // Инициализация MapKit (один раз за жизнь приложения)
         if (!mapKitInitialized) {
@@ -48,8 +69,10 @@ public class DetailActivity extends AppCompatActivity {
             MapKitFactory.initialize(this);
             mapKitInitialized = true;
         }
+        Log.d(TAG, "2. MapKit init OK");
 
         setContentView(R.layout.activity_detail);
+        Log.d(TAG, "3. setContentView OK");
 
         // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbarDetail);
@@ -58,6 +81,7 @@ public class DetailActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("Акция");
         }
+        Log.d(TAG, "4. toolbar OK");
 
         favoritesManager = FavoritesManager.getInstance(this);
 
@@ -69,6 +93,9 @@ public class DetailActivity extends AppCompatActivity {
             finish();
             return;
         }
+        Log.d(TAG, "5. discount=" + discount.getName()
+                + ", lat=" + discount.getLatitude()
+                + ", lng=" + discount.getLongitude());
 
         // Находим View
         TextView tvTitle = findViewById(R.id.tvDetailTitle);
@@ -82,6 +109,7 @@ public class DetailActivity extends AppCompatActivity {
         Button btnOpenWebsite = findViewById(R.id.btnOpenWebsite);
         Button btnShare = findViewById(R.id.btnShare);
         mapView = findViewById(R.id.mapview);
+        Log.d(TAG, "6. findViewById OK, mapView=" + (mapView != null));
 
         // Заполняем данными
         tvTitle.setText(discount.getName());
@@ -89,9 +117,17 @@ public class DetailActivity extends AppCompatActivity {
         tvDescription.setText(discount.getPromotional());
         tvAddress.setText(discount.getAddress());
         tvExpires.setText(discount.getTimeOfApplication());
+        ImageView ivDetailImage = findViewById(R.id.ivDetailImage);
+        ivDetailImage.setImageResource(
+                TypeImageMapper.getImageResByType(discount.getType())
+        );
+        Log.d(TAG, "7. setText OK, перед geocodeAddress");
 
-        // === Yandex MapKit ===
-        setupMap();
+        // === Yandex MapKit: Geocoder + fallback ===
+        geocodeAddress(discount.getAddress(),
+                discount.getLatitude(),
+                discount.getLongitude());
+        Log.d(TAG, "8. после geocodeAddress");
 
         // Секция сайта
         String website = discount.getLinkToWebsite();
@@ -135,39 +171,138 @@ public class DetailActivity extends AppCompatActivity {
                             "\n" + discount.getAddress());
             startActivity(Intent.createChooser(shareIntent, "Поделиться"));
         });
+
+        Log.d(TAG, "9. onCreate FINISHED");
     }
 
-    private void setupMap() {
-        Map map = mapView.getMapWindow().getMap();
+    /**
+     * Получить координаты по адресу через Android Geocoder.
+     * Если не удалось — использовать координаты города (fallback).
+     */
+    private void geocodeAddress(String address, double fallbackLat, double fallbackLng) {
+        if (address == null || address.isEmpty()) {
+            Log.d("GEO", "Адрес пустой → fallback");
+            updateMap(fallbackLat, fallbackLng);
+            return;
+        }
 
-        Point point = new Point(discount.getLatitude(), discount.getLongitude());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+            geocoder.getFromLocationName(address, 1, new Geocoder.GeocodeListener() {
+                @Override
+                public void onGeocode(@NonNull List<Address> addresses) {
+                    if (!addresses.isEmpty()) {
+                        Address addr = addresses.get(0);
+                        Log.d("GEO", "Точные координаты: " + addr.getLatitude() + ", " + addr.getLongitude());
+                        updateMap(addr.getLatitude(), addr.getLongitude());
+                    } else {
+                        Log.d("GEO", "Geocoder не нашёл → fallback");
+                        updateMap(fallbackLat, fallbackLng);
+                    }
+                }
 
-        // Создаём маркер
-        PlacemarkMapObject placemark = map.getMapObjects().addPlacemark(point);
-
-        // Прозрачность 90% (как в примере)
-        placemark.setOpacity(0.9f);
-
-        // Кастомная иконка (mark.png)
-        placemark.setIcon(ImageProvider.fromResource(this, R.drawable.mark));
-
-        // Обработчик тапа
-        placemark.addTapListener(markerTapListener);
-
-        // Камера к точке
-        map.move(
-                new CameraPosition(point, 15.0f, 0.0f, 0.0f),
-                new Animation(Animation.Type.SMOOTH, 0.5f)
-        );
+                @Override
+                public void onError(String errorMessage) {
+                    Log.e("GEO", "Ошибка: " + errorMessage + " → fallback");
+                    updateMap(fallbackLat, fallbackLng);
+                }
+            });
+        } else {
+            new Thread(() -> {
+                try {
+                    Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                    List<Address> addresses = geocoder.getFromLocationName(address, 1);
+                    if (addresses != null && !addresses.isEmpty()) {
+                        Address addr = addresses.get(0);
+                        Log.d("GEO", "Точные координаты: " + addr.getLatitude() + ", " + addr.getLongitude());
+                        runOnUiThread(() -> updateMap(addr.getLatitude(), addr.getLongitude()));
+                    } else {
+                        Log.d("GEO", "Geocoder не нашёл → fallback");
+                        runOnUiThread(() -> updateMap(fallbackLat, fallbackLng));
+                    }
+                } catch (IOException e) {
+                    Log.e("GEO", "IOException: " + e.getMessage() + " → fallback");
+                    runOnUiThread(() -> updateMap(fallbackLat, fallbackLng));
+                }
+            }).start();
+        }
     }
+
+    /**
+     * Обновить карту: камера + маркер на координатах.
+     * Безопасно вызывается как до onStart (тогда откладывается), так и после.
+     */
+    private void updateMap(double lat, double lng) {
+        if (mapView == null) {
+            Log.w(TAG, "updateMap: mapView == null, пропускаем");
+            return;
+        }
+
+        // Если карта ещё не готова — запоминаем координаты и выйдем
+        if (!mapReady) {
+            Log.d(TAG, "updateMap: mapReady=false, откладываем lat=" + lat + ", lng=" + lng);
+            pendingLat = lat;
+            pendingLng = lng;
+            hasPendingCoords = true;
+            return;
+        }
+
+        // Гарантируем работу в UI-потоке
+        mapView.post(() -> {
+            try {
+                // Защита от (0,0)
+                double safeLat = lat;
+                double safeLng = lng;
+                if (safeLat == 0.0 && safeLng == 0.0) {
+                    Log.w(TAG, "Координаты (0,0)! Используем Москву.");
+                    safeLat = 55.7558;
+                    safeLng = 37.6173;
+                }
+
+                Map map = mapView.getMapWindow().getMap();
+                if (map == null) {
+                    Log.w(TAG, "updateMap: map == null");
+                    return;
+                }
+
+                Point point = new Point(safeLat, safeLng);
+
+                map.getMapObjects().clear();
+
+                PlacemarkMapObject placemark = map.getMapObjects().addPlacemark(point);
+                placemark.setOpacity(0.9f);
+                placemark.setIcon(ImageProvider.fromResource(this, R.drawable.mark));
+                placemark.addTapListener(markerTapListener);
+
+                map.move(
+                        new CameraPosition(point, 15.0f, 0.0f, 0.0f),
+                        new Animation(Animation.Type.SMOOTH, 0.5f)
+                );
+
+                Log.d(TAG, "updateMap: маркер поставлен на " + safeLat + ", " + safeLng);
+            } catch (Exception e) {
+                Log.e(TAG, "updateMap: исключение", e);
+            }
+        });
+    }
+
     /**
      * Тап по маркеру → внешнее приложение карт.
      */
     private final MapObjectTapListener markerTapListener = new MapObjectTapListener() {
         @Override
         public boolean onMapObjectTap(MapObject mapObject, Point point) {
-            String uri = "geo:" + discount.getLatitude() + "," + discount.getLongitude() +
-                    "?q=" + Uri.encode(discount.getAddress());
+            // Используем точку, на которую тапнули (она всегда валидна),
+            // а не discount.getLatitude() — он может быть 0.
+            double lat = point.getLatitude();
+            double lng = point.getLongitude();
+            String query = discount != null && discount.getAddress() != null
+                    ? Uri.encode(discount.getAddress())
+                    : "";
+
+            String uri = "geo:" + lat + "," + lng + "?q=" + lat + "," + lng
+                    + (query.isEmpty() ? "" : "(" + query + ")");
+
             try {
                 startActivity(Intent.createChooser(
                         new Intent(Intent.ACTION_VIEW, Uri.parse(uri)),
@@ -195,10 +330,20 @@ public class DetailActivity extends AppCompatActivity {
         super.onStart();
         if (mapView != null) mapView.onStart();
         MapKitFactory.getInstance().onStart();
+        mapReady = true;
+
+        // Если координаты пришли до onStart — применяем их сейчас
+        if (hasPendingCoords) {
+            Log.d(TAG, "onStart: применяем отложенные координаты "
+                    + pendingLat + ", " + pendingLng);
+            updateMap(pendingLat, pendingLng);
+            hasPendingCoords = false;
+        }
     }
 
     @Override
     protected void onStop() {
+        mapReady = false;
         if (mapView != null) mapView.onStop();
         MapKitFactory.getInstance().onStop();
         super.onStop();

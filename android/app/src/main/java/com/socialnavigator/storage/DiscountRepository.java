@@ -53,6 +53,7 @@ public class DiscountRepository {
                                            @NonNull Response<List<Discount>> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             List<Discount> deduped = deduplicate(response.body());
+                            fillCoordinatesByCity(deduped);   // ← ДОБАВИЛИ fallback
                             discounts.clear();
                             discounts.addAll(deduped);
                             callback.onSuccess(discounts);
@@ -151,5 +152,45 @@ public class DiscountRepository {
         List<String> result = new ArrayList<>(typesSet);
         Collections.sort(result);
         return result;
+    }
+    /**
+     * Заполнить координаты скидок по городу.
+     * Используется как fallback, если точные координаты неизвестны.
+     */
+    public void fillCoordinatesByCity(List<Discount> list) {
+        for (Discount d : list) {
+            if (d.getCity() == null) continue;
+
+            switch (d.getCity()) {
+                case "Москва":
+                    d.setLatitude(55.7558);
+                    d.setLongitude(37.6173);
+                    break;
+                case "Санкт-Петербург":
+                    d.setLatitude(59.9343);
+                    d.setLongitude(30.3351);
+                    break;
+                case "Новосибирск":
+                    d.setLatitude(55.0084);
+                    d.setLongitude(82.9357);
+                    break;
+                case "Екатеринбург":
+                    d.setLatitude(56.8389);
+                    d.setLongitude(60.6057);
+                    break;
+                case "Казань":
+                    d.setLatitude(55.8304);
+                    d.setLongitude(49.0661);
+                    break;
+                case "Нижний Новгород":
+                    d.setLatitude(56.3269);
+                    d.setLongitude(44.0059);
+                    break;
+                default:
+                    d.setLatitude(55.7558);
+                    d.setLongitude(37.6173);
+                    break;
+            }
+        }
     }
 }
