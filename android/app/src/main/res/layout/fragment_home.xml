@@ -75,6 +75,7 @@
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
+        <!-- Заглушка при пустом списке -->
         <TextView
             android:id="@+id/tvEmpty"
             android:layout_width="wrap_content"
@@ -83,6 +84,14 @@
             android:text="Скидок пока нет"
             android:textSize="16sp"
             android:textColor="@color/text_tertiary"
+            android:visibility="gone"/>
+
+        <!-- Индикатор загрузки -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:visibility="gone"/>
 
     </FrameLayout>
